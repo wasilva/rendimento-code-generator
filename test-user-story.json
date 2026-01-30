@@ -1,0 +1,24 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11315,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11315",
+    "fields": {
+      "System.Title": "Sistema de gerenciamento de clientes",
+      "System.Description": "Como administrador do sistema, eu quero poder cadastrar, listar, editar e excluir clientes para manter um controle organizado da base de clientes da empresa. O sistema deve incluir validação de CPF/CNPJ, campos obrigatórios (nome, email, telefone) e busca por nome ou documento. Deve ter uma API REST completa com endpoints para CRUD e uma interface de listagem com paginação.",
+      "Microsoft.VSTS.Common.AcceptanceCriteria": "1. Deve permitir cadastrar cliente com nome, email, telefone, CPF/CNPJ\n2. Deve validar formato de email e CPF/CNPJ\n3. Deve listar clientes com paginação (10 por página)\n4. Deve permitir buscar cliente por nome ou documento\n5. Deve permitir editar dados do cliente\n6. Deve permitir excluir cliente\n7. Deve retornar erros apropriados para dados inválidos",
+      "System.AreaPath": "Rendimento\\Backend",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app",
+      "Microsoft.VSTS.Common.Priority": 1
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}

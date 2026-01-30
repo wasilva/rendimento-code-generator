@@ -1,0 +1,22 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11310,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11310",
+    "fields": {
+      "System.Title": "API de cadastro de produtos",
+      "System.Description": "Criar uma API REST para cadastro, listagem, atualização e exclusão de produtos. Deve incluir validação de dados e tratamento de erros.",
+      "System.AreaPath": "Rendimento",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}

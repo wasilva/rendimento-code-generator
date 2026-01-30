@@ -84,6 +84,24 @@ export interface IAzureDevOpsService {
     commitSha: string;
     error?: string;
   }>;
+
+  /**
+   * Create a commit with file changes in a branch
+   * @param repositoryId - The ID of the repository
+   * @param branchName - Name of the branch to commit to
+   * @param files - Array of file changes
+   * @param message - Commit message
+   * @returns Promise resolving to commit result
+   */
+  createCommit(repositoryId: string, branchName: string, files: Array<{
+    path: string;
+    content: string;
+    operation: 'add' | 'edit' | 'delete';
+  }>, message: string): Promise<{
+    success: boolean;
+    commitSha: string;
+    error?: string;
+  }>;
 }
 
 /**
@@ -527,6 +545,123 @@ export class AzureDevOpsService implements IAzureDevOpsService {
         };
       }
     }, 'createBranch');
+  }
+
+  /**
+   * Create a commit with file changes in a branch
+   */
+  async createCommit(repositoryId: string, branchName: string, files: Array<{
+    path: string;
+    content: string;
+    operation: 'add' | 'edit' | 'delete';
+  }>, message: string): Promise<{
+    success: boolean;
+    commitSha: string;
+    error?: string;
+  }> {
+    await this.initializeApis();
+    
+    return this.executeWithRetry(async () => {
+      if (!this.gitApi) {
+        throw new Error('Git API not initialized');
+      }
+
+      try {
+        console.log(`📝 Creating commit in branch: ${branchName}`, {
+          repositoryId,
+          filesCount: files.length,
+          message
+        });
+
+        // 1. Get the current commit SHA of the branch
+        const branchRef = await this.gitApi.getRefs(
+          repositoryId,
+          this.config.project,
+          `heads/${branchName}`
+        );
+
+        if (!branchRef || branchRef.length === 0) {
+          throw new Error(`Branch '${branchName}' not found`);
+        }
+
+        const currentCommitSha = branchRef[0]?.objectId;
+        if (!currentCommitSha) {
+          throw new Error(`Could not get current commit SHA for branch '${branchName}'`);
+        }
+
+        // 2. Prepare the commit changes
+        const changes = files.map(file => {
+          const change: any = {
+            changeType: file.operation === 'add' ? 1 : file.operation === 'edit' ? 2 : 16, // Add=1, Edit=2, Delete=16
+            item: {
+              path: file.path
+            }
+          };
+          
+          if (file.operation !== 'delete') {
+            change.newContent = {
+              content: file.content,
+              contentType: 0 // RawText
+            };
+          }
+          
+          return change;
+        });
+
+        // 3. Create the commit
+        const commitData: any = {
+          refUpdates: [
+            {
+              name: `refs/heads/${branchName}`,
+              oldObjectId: currentCommitSha
+            }
+          ],
+          commits: [
+            {
+              comment: message,
+              changes: changes
+            }
+          ]
+        };
+
+        console.log(`🚀 Pushing commit with ${changes.length} changes`);
+
+        const pushResult = await this.gitApi.createPush(
+          commitData,
+          repositoryId,
+          this.config.project
+        );
+
+        if (!pushResult || !pushResult.commits || pushResult.commits.length === 0) {
+          throw new Error('Failed to create commit - no commit returned');
+        }
+
+        const newCommitSha = pushResult.commits[0]?.commitId;
+        if (!newCommitSha) {
+          throw new Error('No commit SHA returned from push');
+        }
+        
+        console.log(`✅ Commit created successfully: ${newCommitSha}`);
+
+        return {
+          success: true,
+          commitSha: newCommitSha
+        };
+      } catch (error) {
+        console.error(`❌ Error in createCommit:`, {
+          error: error instanceof Error ? error.message : error,
+          repositoryId,
+          branchName,
+          project: this.config.project
+        });
+        
+        return {
+          success: false,
+          commitSha: '',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    }, 'createCommit');
   }
 
   /**

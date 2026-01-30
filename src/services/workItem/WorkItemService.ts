@@ -30,8 +30,7 @@ export interface IWorkItemService {
 export class WorkItemService implements IWorkItemService {
   constructor(
     private azureDevOpsService: IAzureDevOpsService,
-    // @ts-ignore - Will be used for AI code generation in future implementation
-    private geminiService: IGeminiService,
+    private geminiService: IGeminiService, // Agora será usado para geração de código
     private gitService: IGitService,
     private pullRequestService: IPullRequestService,
     private repositoryConfigs: Record<string, IRepositoryConfig>
@@ -39,8 +38,8 @@ export class WorkItemService implements IWorkItemService {
 
   async processWorkItem(workItemData: IWorkItemWebhookPayload): Promise<IProcessingResult> {
     try {
-      // 1. Enrich work item data
-      const enrichedWorkItem = await this.enrichWorkItemData(workItemData.resource.id);
+      // 1. Enrich work item data (pass webhook data for fallback)
+      const enrichedWorkItem = await this.enrichWorkItemData(workItemData.resource.id, workItemData);
       
       // 2. Determine target repository
       const repositoryConfig = await this.determineTargetRepository(enrichedWorkItem);
@@ -63,32 +62,63 @@ export class WorkItemService implements IWorkItemService {
       // 4. Generate branch name
       const branchName = this.gitService.generateBranchName(enrichedWorkItem);
       
-      // 5. Generate code using AI (if code prompt is available)
+      // 5. Create branch in Azure DevOps first
+      const branchResult = await this.gitService.createBranch(branchName);
+      if (!branchResult.success) {
+        return {
+          success: false,
+          workItemId: enrichedWorkItem.id,
+          error: `Failed to create branch: ${branchResult.error}`,
+          processingDetails: processingResult
+        };
+      }
+      
+      // 6. Generate code using AI (if code prompt is available)
       let generatedCode;
       if (processingResult.codePrompt) {
-        generatedCode = await this.geminiService.generateCode(processingResult.codePrompt);
+        console.log(`🤖 Generating code for work item ${enrichedWorkItem.id}`);
+        try {
+          generatedCode = await this.geminiService.generateCode(processingResult.codePrompt);
+          console.log(`✅ Code generated: ${generatedCode.files.length} files, ${generatedCode.tests.length} tests`);
+        } catch (error) {
+          console.warn(`⚠️ Code generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          // Continue without generated code
+        }
       }
       
-      // 6. Create branch and commit (if code was generated)
-      if (generatedCode) {
-        // Create branch in Azure DevOps
-        await this.gitService.createBranch(branchName);
+      // 7. Commit generated code to the branch (if available)
+      if (generatedCode && generatedCode.files.length > 0) {
+        console.log(`📝 Committing ${generatedCode.files.length} generated files`);
         
         // Convert generated files to file changes
-        const fileChanges = generatedCode.files.map(file => ({
-          path: file.path,
-          content: file.content,
-          operation: FileOperation.CREATE
-        }));
+        const fileChanges = [
+          ...generatedCode.files.map(file => ({
+            path: file.path,
+            content: file.content,
+            operation: FileOperation.CREATE
+          })),
+          ...generatedCode.tests.map(test => ({
+            path: test.path,
+            content: test.content,
+            operation: FileOperation.CREATE
+          }))
+        ];
         
         // Commit generated code to the branch
-        await this.gitService.commitChanges(fileChanges, `feat: ${enrichedWorkItem.title}`);
-      } else {
-        // Even without generated code, create an empty branch for the PR
-        await this.gitService.createBranch(branchName);
+        const commitResult = await this.gitService.commitChanges(
+          fileChanges, 
+          `feat: ${enrichedWorkItem.title}\n\n${enrichedWorkItem.description || 'Auto-generated code from work item'}`
+        );
+        
+        if (!commitResult.success) {
+          console.warn(`⚠️ Failed to commit generated code: ${commitResult.error}`);
+          // Continue with PR creation even if commit fails
+        } else {
+          console.log(`✅ Code committed successfully: ${commitResult.commitSha}`);
+        }
       }
       
-      // 7. Create pull request
+      // 8. Create pull request
       const pullRequestData = this.pullRequestService.generatePullRequestData(
         enrichedWorkItem,
         branchName,
@@ -116,7 +146,7 @@ export class WorkItemService implements IWorkItemService {
     }
   }
 
-  async enrichWorkItemData(workItemId: number): Promise<IEnrichedWorkItem> {
+  async enrichWorkItemData(workItemId: number, webhookData?: IWorkItemWebhookPayload): Promise<IEnrichedWorkItem> {
     try {
       const workItem = await this.azureDevOpsService.getWorkItem(workItemId);
       
@@ -136,12 +166,32 @@ export class WorkItemService implements IWorkItemService {
         customFields: workItem.fields
       };
     } catch (error) {
-      // If Azure DevOps API fails, create a mock work item from webhook data for testing
-      console.warn(`Failed to fetch work item ${workItemId} from Azure DevOps, using mock data`);
+      // If Azure DevOps API fails, use webhook data if available
+      console.warn(`Failed to fetch work item ${workItemId} from Azure DevOps, using webhook data`);
       
+      if (webhookData?.resource?.fields) {
+        const fields = webhookData.resource.fields;
+        return {
+          id: workItemId,
+          type: this.mapWorkItemType(webhookData.resource.workItemType || fields['System.WorkItemType']),
+          title: fields['System.Title'] || `Work Item ${workItemId}`,
+          description: fields['System.Description'] || '',
+          acceptanceCriteria: fields['Microsoft.VSTS.Common.AcceptanceCriteria'] || '',
+          reproductionSteps: fields['Microsoft.VSTS.TCM.ReproSteps'] || '',
+          assignedTo: fields['System.AssignedTo'] || 'System',
+          areaPath: fields['System.AreaPath'] || 'Rendimento\\Backend',
+          iterationPath: fields['System.IterationPath'] || 'Rendimento\\Sprint 1',
+          state: fields['System.State'] || 'New',
+          priority: fields['Microsoft.VSTS.Common.Priority'] || 2,
+          tags: fields['System.Tags']?.split(';') || ['auto-generated'],
+          customFields: fields
+        };
+      }
+      
+      // Fallback to basic mock data
       return {
         id: workItemId,
-        type: WorkItemType.TASK, // Default to Task for testing
+        type: WorkItemType.TASK,
         title: `Mock Work Item ${workItemId}`,
         description: 'This is a mock work item for testing purposes',
         acceptanceCriteria: '',
