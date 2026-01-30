@@ -18,7 +18,7 @@ export class AzureGitService implements IGitService {
   private project: string;
 
   constructor(
-    _azureDevOpsService: IAzureDevOpsService, // Prefixed with _ to indicate unused
+    private azureDevOpsService: IAzureDevOpsService, // Agora vamos usar este serviço
     repositoryId: string,
     project: string
   ) {
@@ -28,16 +28,37 @@ export class AzureGitService implements IGitService {
 
   async createBranch(branchName: string, baseBranch?: string): Promise<IBranchCreationResult> {
     try {
-      // For now, we'll simulate branch creation since Azure DevOps branches are created on first push
-      // In a real implementation, you would create the branch via Azure DevOps REST API
+      const base = baseBranch || 'main';
       
-      return {
-        success: true,
+      console.log(`📝 Creating branch: ${branchName} from ${base}`);
+      
+      // Criar a branch real no Azure DevOps
+      const result = await this.azureDevOpsService.createBranch(
+        this.repositoryId,
         branchName,
-        baseBranch: baseBranch || 'main',
-        commitSha: 'simulated-commit-sha'
-      };
+        base
+      );
+      
+      if (result.success) {
+        console.log(`✅ Branch created successfully: ${branchName}`);
+        return {
+          success: true,
+          branchName,
+          baseBranch: base,
+          commitSha: result.commitSha
+        };
+      } else {
+        console.error(`❌ Failed to create branch: ${result.error}`);
+        return {
+          success: false,
+          branchName,
+          baseBranch: base,
+          commitSha: '',
+          error: result.error || 'Unknown error'
+        };
+      }
     } catch (error) {
+      console.error(`❌ Error creating branch: ${error}`);
       return {
         success: false,
         branchName,

@@ -70,6 +70,20 @@ export interface IAzureDevOpsService {
    * @returns Promise resolving to created pull request
    */
   createPullRequest(repositoryId: string, pullRequestData: any): Promise<IPullRequest>;
+
+  /**
+   * Create a new branch in the repository
+   * @param repositoryId - The ID of the repository
+   * @param branchName - Name of the new branch
+   * @param baseBranch - Name of the base branch (default: main)
+   * @returns Promise resolving to branch creation result
+   */
+  createBranch(repositoryId: string, branchName: string, baseBranch?: string): Promise<{
+    success: boolean;
+    branchName: string;
+    commitSha: string;
+    error?: string;
+  }>;
 }
 
 /**
@@ -423,6 +437,68 @@ export class AzureDevOpsService implements IAzureDevOpsService {
 
       return this.transformPullRequest(createdPr);
     }, 'createPullRequest');
+  }
+
+  /**
+   * Create a new branch in the repository
+   */
+  async createBranch(repositoryId: string, branchName: string, baseBranch: string = 'main'): Promise<{
+    success: boolean;
+    branchName: string;
+    commitSha: string;
+    error?: string;
+  }> {
+    await this.initializeApis();
+    
+    return this.executeWithRetry(async () => {
+      if (!this.gitApi) {
+        throw new Error('Git API not initialized');
+      }
+
+      try {
+        // 1. Get the latest commit SHA from the base branch
+        const baseRef = await this.gitApi.getRefs(
+          repositoryId,
+          this.config.project,
+          `heads/${baseBranch}`
+        );
+
+        if (!baseRef || baseRef.length === 0) {
+          throw new Error(`Base branch '${baseBranch}' not found`);
+        }
+
+        const baseCommitSha = baseRef[0]?.objectId;
+        if (!baseCommitSha) {
+          throw new Error(`Could not get commit SHA for base branch '${baseBranch}'`);
+        }
+
+        // 2. Create the new branch reference
+        const newRef = {
+          name: `refs/heads/${branchName}`,
+          oldObjectId: '0000000000000000000000000000000000000000', // New branch
+          newObjectId: baseCommitSha
+        };
+
+        await this.gitApi.updateRefs(
+          [newRef],
+          repositoryId,
+          this.config.project
+        );
+
+        return {
+          success: true,
+          branchName,
+          commitSha: baseCommitSha
+        };
+      } catch (error) {
+        return {
+          success: false,
+          branchName,
+          commitSha: '',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    }, 'createBranch');
   }
 
   /**
