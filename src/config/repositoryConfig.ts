@@ -139,8 +139,7 @@ export const defaultRepositoryConfig: IRepositoryConfig = {
   codeTemplates: defaultCodeTemplates,
   codingStandards: defaultCodingStandards,
   reviewers: [
-    'miqueas.teixeira@madeinweb.app',
-    'luisairtonsilva@gmail.com'
+    'qacoders@qacoders.com.br'
   ],
   areaPathMappings: {
     'Rendimento': process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
