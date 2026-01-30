@@ -1,0 +1,26 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 123,
+    "workItemType": "Task",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/123",
+    "fields": {
+      "System.Title": "Implementar autenticação de usuário",
+      "System.Description": "Criar sistema de autenticação com JWT para a aplicação",
+      "System.WorkItemType": "Task",
+      "System.State": "New",
+      "System.AreaPath": "Rendimento\\Backend",
+      "System.AssignedTo": {
+        "displayName": "Desenvolvedor"
+      }
+    }
+  },
+  "resourceVersion": "1.0",
+  "resourceContainers": {
+    "project": {
+      "id": "b1234567-89ab-cdef-0123-456789abcdef",
+      "name": "Rendimento"
+    }
+  }
+}

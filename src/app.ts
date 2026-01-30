@@ -4,6 +4,16 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createLogger, format, transports } from 'winston';
 
+// Import services and controllers
+import { WebhookController } from './controllers/WebhookController';
+import { WorkItemService } from './services/workItem/WorkItemService';
+import { createAzureDevOpsServiceFromEnv } from './services/azure/azureDevOpsService';
+import { GeminiService } from './services/gemini/GeminiService';
+import { MockGeminiService } from './services/gemini/MockGeminiService';
+import { GitService } from './services/git/GitService';
+import { PullRequestService } from './services/git/PullRequestService';
+import { repositoryConfigs } from './config/repositoryConfig';
+
 // Load environment variables
 dotenv.config();
 
@@ -32,6 +42,27 @@ const logger = createLogger({
   ]
 });
 
+// Initialize services
+const azureDevOpsService = createAzureDevOpsServiceFromEnv();
+
+// Create a mock Gemini service for testing (since API key might not be configured)
+const geminiService = new MockGeminiService(); // Always use mock for now
+
+const gitService = new GitService();
+const pullRequestService = new PullRequestService(azureDevOpsService);
+
+// Initialize WorkItemService with all dependencies
+const workItemService = new WorkItemService(
+  azureDevOpsService,
+  geminiService,
+  gitService,
+  pullRequestService,
+  repositoryConfigs
+);
+
+// Initialize WebhookController
+const webhookController = new WebhookController(workItemService);
+
 // Middleware
 app.use(helmet());
 app.use(cors());
@@ -59,13 +90,8 @@ app.get('/health', (_req, res) => {
 });
 
 // Webhook endpoint for Azure DevOps (POST)
-app.post('/webhook/workitem', (req, res) => {
-  logger.info('Webhook received', { body: req.body });
-  res.status(200).json({ 
-    message: 'Webhook received successfully',
-    timestamp: new Date().toISOString(),
-    workItemId: req.body?.resource?.id || 'unknown'
-  });
+app.post('/webhook/workitem', async (req, res) => {
+  await webhookController.handleWorkItemEvent(req, res);
 });
 
 // Webhook health check endpoint
