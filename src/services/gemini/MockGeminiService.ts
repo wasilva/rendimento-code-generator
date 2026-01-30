@@ -4,7 +4,6 @@
  */
 
 import { 
-  IGeminiService,
   ICodeGenerationPrompt, 
   IGeneratedCode, 
   IValidationResult, 
@@ -13,6 +12,7 @@ import {
   FileType,
   IGeneratedFile
 } from '../../models/codeGeneration';
+import { IGeminiService } from './GeminiService';
 
 /**
  * Mock implementation of GeminiService for testing
@@ -48,37 +48,59 @@ export class MockGeminiService implements IGeminiService {
       tests: [testFile],
       documentation: this.generateDocumentation(serviceName, workItem),
       dependencies: ['typescript', '@types/node'],
-      buildInstructions: 'Run `npm run build` to compile TypeScript files'
+      buildInstructions: 'Run `npm run build` to compile TypeScript files',
+      metadata: {
+        totalFiles: 2, // service + test file
+        totalLines: serviceFile.content.split('\n').length + testFile.content.split('\n').length,
+        generationTime: 1000, // 1 second mock time
+        aiModel: 'MockGeminiService',
+        templateUsed: 'TypeScript Service Template',
+        confidenceScore: 0.95
+      }
     };
   }
   
-  async validateGeneratedCode(code: string, language: string): Promise<IValidationResult> {
+  async validateGeneratedCode(code: string, _language: string): Promise<IValidationResult> {
     // Simulate validation delay
     await this.delay(500);
     
     // Simple mock validation
-    const issues: ICodeIssue[] = [];
+    const syntaxIssues: ICodeIssue[] = [];
+    const lintingIssues: ICodeIssue[] = [];
+    const styleViolations: ICodeIssue[] = [];
+    const securityIssues: ICodeIssue[] = [];
+    const performanceWarnings: ICodeIssue[] = [];
     
     // Check for basic syntax issues
     if (!code.includes('export')) {
-      issues.push({
-        type: 'warning',
+      syntaxIssues.push({
+        type: 'syntax',
+        severity: 'warning',
         message: 'No exports found in the code',
+        file: 'generated.ts',
         line: 1,
         column: 1,
-        severity: 'warning'
+        suggestedFix: 'Add proper exports to your code',
+        canAutoFix: true
       });
     }
     
+    const allIssues = [...syntaxIssues, ...lintingIssues, ...styleViolations, ...securityIssues, ...performanceWarnings];
+    
     return {
-      isValid: issues.length === 0,
-      issues,
-      suggestions: issues.length > 0 ? ['Add proper exports to your code'] : [],
-      score: issues.length === 0 ? 100 : 80
+      isValid: allIssues.length === 0,
+      syntaxErrors: syntaxIssues,
+      lintingIssues,
+      styleViolations,
+      securityIssues,
+      performanceWarnings,
+      qualityScore: allIssues.length === 0 ? 100 : 80,
+      suggestions: allIssues.length > 0 ? ['Add proper exports to your code'] : [],
+      canAutoFix: allIssues.some(issue => issue.canAutoFix)
     };
   }
   
-  async fixCodeIssues(code: string, issues: ICodeIssue[]): Promise<string> {
+  async fixCodeIssues(code: string, _issues: ICodeIssue[]): Promise<string> {
     // Simulate fix delay
     await this.delay(300);
     
