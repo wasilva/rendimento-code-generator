@@ -141,7 +141,7 @@ export class PullRequestService implements IPullRequestService {
    */
   generatePullRequestData(
     workItem: IEnrichedWorkItem, 
-    _sourceBranch: string, // Prefixed with _ to indicate unused
+    sourceBranch: string,
     repositoryConfig: IRepositoryConfig
   ): IPullRequestData {
     // Generate title based on work item
@@ -157,14 +157,14 @@ export class PullRequestService implements IPullRequestService {
     const labels = this.generateLabels(workItem);
     
     return {
-      title,
+      title: `${title} - ${new Date().toISOString()}`, // Add timestamp to make unique
       description,
-      sourceBranch: repositoryConfig.defaultBranch, // Use main as source
-      targetBranch: 'develop', // Use develop as target (will create if doesn't exist)
+      sourceBranch: sourceBranch, // Use the actual generated branch name
+      targetBranch: 'develop', // Use develop as target
       reviewers,
       workItemIds: [workItem.id],
       labels,
-      isDraft: false,
+      isDraft: true, // Create as draft to avoid conflicts
       autoComplete: false,
       options: {
         deleteSourceBranch: false,

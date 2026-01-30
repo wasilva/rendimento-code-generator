@@ -1,0 +1,22 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11290,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11290",
+    "fields": {
+      "System.Title": "Sistema de notificações",
+      "System.Description": "Implementar sistema de notificações para usuários",
+      "System.AreaPath": "Rendimento",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}
