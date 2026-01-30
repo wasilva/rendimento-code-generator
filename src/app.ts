@@ -8,7 +8,6 @@ import { createLogger, format, transports } from 'winston';
 import { WebhookController } from './controllers/WebhookController';
 import { WorkItemService } from './services/workItem/WorkItemService';
 import { createAzureDevOpsServiceFromEnv } from './services/azure/azureDevOpsService';
-import { GeminiService } from './services/gemini/GeminiService';
 import { MockGeminiService } from './services/gemini/MockGeminiService';
 import { GitService } from './services/git/GitService';
 import { PullRequestService } from './services/git/PullRequestService';
