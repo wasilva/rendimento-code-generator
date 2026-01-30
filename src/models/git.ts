@@ -504,3 +504,222 @@ export interface IDiffInfo {
   /** Head commit SHA */
   headCommit: string;
 }
+
+/**
+ * Interface for Git service operations
+ * Main interface for Git operations like branch creation, commits, and pushes
+ */
+export interface IGitService {
+  /** Create a new branch from the default branch */
+  createBranch(branchName: string, baseBranch?: string): Promise<IBranchCreationResult>;
+  
+  /** Commit changes to the current branch */
+  commitChanges(files: IFileChange[], message: string): Promise<ICommitResult>;
+  
+  /** Push branch to remote repository */
+  pushBranch(branchName: string): Promise<IGitOperationResult>;
+  
+  /** Get list of branches */
+  getBranches(): Promise<string[]>;
+  
+  /** Get current branch name */
+  getCurrentBranch(): Promise<string>;
+  
+  /** Switch to a different branch */
+  switchBranch(branchName: string): Promise<IGitOperationResult>;
+  
+  /** Get repository information */
+  getRepositoryInfo(): Promise<IRepositoryInfo>;
+}
+
+/**
+ * Interface for branch creation result
+ */
+export interface IBranchCreationResult {
+  /** Whether the branch creation was successful */
+  success: boolean;
+  
+  /** Name of the created branch */
+  branchName: string;
+  
+  /** Error message if creation failed */
+  error?: string;
+  
+  /** Base branch used for creation */
+  baseBranch: string;
+  
+  /** Commit SHA where branch was created */
+  commitSha: string;
+}
+
+/**
+ * Interface for commit operation result
+ */
+export interface ICommitResult {
+  /** Whether the commit was successful */
+  success: boolean;
+  
+  /** SHA of the created commit */
+  commitSha: string;
+  
+  /** Commit message */
+  message: string;
+  
+  /** Error message if commit failed */
+  error?: string;
+  
+  /** Files that were committed */
+  files: string[];
+  
+  /** Commit statistics */
+  stats: {
+    /** Number of files changed */
+    filesChanged: number;
+    
+    /** Number of lines added */
+    additions: number;
+    
+    /** Number of lines deleted */
+    deletions: number;
+  };
+}
+
+/**
+ * Interface for Git configuration
+ */
+export interface IGitConfiguration {
+  /** Repository path */
+  repositoryPath: string;
+  
+  /** Remote repository URL */
+  remoteUrl: string;
+  
+  /** Default branch name */
+  defaultBranch: string;
+  
+  /** Repository owner (GitHub username or organization) */
+  owner?: string;
+  
+  /** Repository name */
+  repo?: string;
+  
+  /** Git user configuration */
+  user: {
+    /** User name for commits */
+    name: string;
+    
+    /** User email for commits */
+    email: string;
+  };
+  
+  /** Authentication configuration */
+  auth?: {
+    /** Authentication type */
+    type: 'token' | 'ssh' | 'basic';
+    
+    /** Authentication token or password */
+    token?: string;
+    
+    /** Username for basic auth */
+    username?: string;
+    
+    /** SSH key path */
+    sshKeyPath?: string;
+  };
+  
+  /** GitHub token for API operations */
+  githubToken?: string;
+}
+
+/**
+ * Interface for Pull Request service operations
+ */
+export interface IPullRequestService {
+  /** Create a new pull request */
+  createPullRequest(
+    sourceBranch: string,
+    title: string,
+    description: string,
+    workItem: any,
+    reviewers?: string[]
+  ): Promise<IPullRequestCreationResult>;
+  
+  /** Update an existing pull request */
+  updatePullRequest(
+    pullRequestId: number,
+    title?: string,
+    description?: string
+  ): Promise<IPullRequestUpdateResult>;
+  
+  /** Get pull request information */
+  getPullRequestInfo(pullRequestId: number): Promise<IPullRequestInfo | null>;
+}
+
+/**
+ * Interface for pull request creation result
+ */
+export interface IPullRequestCreationResult {
+  /** Whether the creation was successful */
+  success: boolean;
+  
+  /** ID of the created pull request */
+  pullRequestId?: number;
+  
+  /** URL of the created pull request */
+  pullRequestUrl?: string;
+  
+  /** Error message if creation failed */
+  error?: string;
+  
+  /** Success or error message */
+  message: string;
+}
+
+/**
+ * Interface for pull request update result
+ */
+export interface IPullRequestUpdateResult {
+  /** Whether the update was successful */
+  success: boolean;
+  
+  /** URL of the updated pull request */
+  pullRequestUrl?: string;
+  
+  /** Error message if update failed */
+  error?: string;
+  
+  /** Success or error message */
+  message: string;
+}
+
+/**
+ * Interface for pull request information
+ */
+export interface IPullRequestInfo {
+  /** Pull request ID */
+  id: number;
+  
+  /** Pull request title */
+  title: string;
+  
+  /** Pull request description */
+  description: string;
+  
+  /** Source branch name */
+  sourceBranch: string;
+  
+  /** Target branch name */
+  targetBranch: string;
+  
+  /** Pull request state */
+  state: string;
+  
+  /** Pull request URL */
+  url: string;
+  
+  /** Creation date */
+  createdAt: Date;
+  
+  /** Last update date */
+  updatedAt: Date;
+}
