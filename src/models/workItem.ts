@@ -31,11 +31,11 @@ export interface IWorkItemWebhookPayload {
     /** Unique identifier of the work item */
     id: number;
     
-    /** Type of the work item (User Story, Task, Bug, etc.) */
-    workItemType: string;
+    /** Type of the work item (User Story, Task, Bug, etc.) - optional, may be in fields */
+    workItemType?: string;
     
     /** URL to access the work item via Azure DevOps API */
-    url: string;
+    url?: string;
     
     /** Dynamic fields containing work item data */
     fields: Record<string, any>;

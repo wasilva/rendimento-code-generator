@@ -134,9 +134,11 @@ export class WebhookController implements IWebhookController {
       typeof body.eventType === 'string' &&
       body.resource &&
       typeof body.resource.id === 'number' &&
-      typeof body.resource.workItemType === 'string' &&
       body.resource.fields &&
-      typeof body.resource.fields === 'object'
+      typeof body.resource.fields === 'object' &&
+      // Check if workItemType is either directly in resource or in fields
+      (typeof body.resource.workItemType === 'string' || 
+       typeof body.resource.fields['System.WorkItemType'] === 'string')
     );
   }
 
