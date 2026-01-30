@@ -141,7 +141,7 @@ export class PullRequestService implements IPullRequestService {
    */
   generatePullRequestData(
     workItem: IEnrichedWorkItem, 
-    sourceBranch: string, 
+    _sourceBranch: string, // Prefixed with _ to indicate unused
     repositoryConfig: IRepositoryConfig
   ): IPullRequestData {
     // Generate title based on work item
