@@ -9,13 +9,15 @@ import {
   ICommitResult, 
   IGitOperationResult,
   IRepositoryInfo,
-  IFileChange
+  IFileChange,
+  FileOperation
 } from '../../models/git';
 import { IAzureDevOpsService } from '../azure/azureDevOpsService';
 
 export class AzureGitService implements IGitService {
   private repositoryId: string;
   private project: string;
+  private currentBranch: string = 'main';
 
   constructor(
     private azureDevOpsService: IAzureDevOpsService, // Agora vamos usar este serviço
@@ -41,6 +43,7 @@ export class AzureGitService implements IGitService {
       
       if (result.success) {
         console.log(`✅ Branch created successfully: ${branchName}`);
+        this.currentBranch = branchName; // Set current branch
         return {
           success: true,
           branchName,
@@ -71,23 +74,57 @@ export class AzureGitService implements IGitService {
 
   async commitChanges(files: IFileChange[], message: string): Promise<ICommitResult> {
     try {
-      // For now, we'll simulate commit creation
-      // In a real implementation, you would create commits via Azure DevOps REST API
+      console.log(`📝 Committing ${files.length} files: ${message}`);
       
-      const stats = {
-        filesChanged: files.length,
-        additions: files.reduce((sum, file) => sum + (file.content?.length || 0), 0),
-        deletions: 0
-      };
+      // Convert IFileChange to Azure DevOps format
+      const azureFiles = files.map(file => ({
+        path: file.path,
+        content: file.content,
+        operation: file.operation === FileOperation.CREATE ? 'add' as const :
+                  file.operation === FileOperation.UPDATE ? 'edit' as const :
+                  'delete' as const
+      }));
 
-      return {
-        success: true,
-        commitSha: 'simulated-commit-sha',
-        message,
-        files: files.map(f => f.path),
-        stats
-      };
+      // Get current branch (we'll assume we're working on the branch we just created)
+      const currentBranch = await this.getCurrentBranch();
+      
+      // Create commit via Azure DevOps API
+      const result = await this.azureDevOpsService.createCommit(
+        this.repositoryId,
+        currentBranch,
+        azureFiles,
+        message
+      );
+      
+      if (result.success) {
+        const stats = {
+          filesChanged: files.length,
+          additions: files.reduce((sum, file) => sum + (file.content?.length || 0), 0),
+          deletions: 0
+        };
+
+        console.log(`✅ Commit created successfully: ${result.commitSha}`);
+        
+        return {
+          success: true,
+          commitSha: result.commitSha,
+          message,
+          files: files.map(f => f.path),
+          stats
+        };
+      } else {
+        console.error(`❌ Failed to create commit: ${result.error}`);
+        return {
+          success: false,
+          commitSha: '',
+          message,
+          files: [],
+          stats: { filesChanged: 0, additions: 0, deletions: 0 },
+          error: result.error || 'Unknown error'
+        };
+      }
     } catch (error) {
+      console.error(`❌ Error in commitChanges: ${error}`);
       return {
         success: false,
         commitSha: '',
@@ -138,7 +175,7 @@ export class AzureGitService implements IGitService {
   }
 
   async getCurrentBranch(): Promise<string> {
-    return 'main';
+    return this.currentBranch;
   }
 
   async switchBranch(branchName: string): Promise<IGitOperationResult> {

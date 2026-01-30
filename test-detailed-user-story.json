@@ -1,0 +1,25 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11320,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11320",
+    "fields": {
+      "System.Title": "API REST para gerenciamento de produtos",
+      "System.Description": "Como administrador do sistema, eu quero uma API REST completa para gerenciar produtos (CRUD) para que eu possa manter o catálogo de produtos atualizado e organizado. A API deve permitir criar, listar, buscar, atualizar e excluir produtos com validação completa de dados.",
+      "Microsoft.VSTS.Common.AcceptanceCriteria": "1. Deve ter endpoint POST /api/products para criar produto\n2. Deve ter endpoint GET /api/products para listar produtos com paginação\n3. Deve ter endpoint GET /api/products/:id para buscar produto específico\n4. Deve ter endpoint PUT /api/products/:id para atualizar produto\n5. Deve ter endpoint DELETE /api/products/:id para excluir produto\n6. Deve validar campos obrigatórios: nome, preço, categoria\n7. Deve retornar erro 400 para dados inválidos\n8. Deve retornar erro 404 para produto não encontrado\n9. Deve incluir middleware de autenticação\n10. Deve ter testes unitários para todos os endpoints",
+      "System.AreaPath": "Rendimento\\Backend",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app",
+      "Microsoft.VSTS.Common.Priority": 1,
+      "System.Tags": "api;rest;crud;products;backend"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}

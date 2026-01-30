@@ -1,0 +1,22 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11305,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11305",
+    "fields": {
+      "System.Title": "Sistema de autenticação de usuários",
+      "System.Description": "Implementar um sistema completo de autenticação com login, logout e validação de tokens JWT. Deve incluir middleware de autenticação e rotas protegidas.",
+      "System.AreaPath": "Rendimento",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}
