@@ -1,0 +1,22 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11300,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11300",
+    "fields": {
+      "System.Title": "Debug branch creation",
+      "System.Description": "Testar criação de branch com logs detalhados",
+      "System.AreaPath": "Rendimento",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}

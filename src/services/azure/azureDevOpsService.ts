@@ -153,6 +153,12 @@ export class AzureDevOpsService implements IAzureDevOpsService {
       ...config
     };
 
+    console.log(`🔧 Initializing Azure DevOps Service:`, {
+      organizationUrl: this.config.organizationUrl,
+      project: this.config.project,
+      timeout: this.config.timeout
+    });
+
     // Create authentication handler using Personal Access Token
     const authHandler = azdev.getPersonalAccessTokenHandler(
       this.config.personalAccessToken
@@ -456,12 +462,21 @@ export class AzureDevOpsService implements IAzureDevOpsService {
       }
 
       try {
+        console.log(`🔍 Creating branch in Azure DevOps:`, {
+          repositoryId,
+          branchName,
+          baseBranch,
+          project: this.config.project
+        });
+
         // 1. Get the latest commit SHA from the base branch
         const baseRef = await this.gitApi.getRefs(
           repositoryId,
           this.config.project,
           `heads/${baseBranch}`
         );
+
+        console.log(`📋 Base refs found:`, baseRef?.length || 0);
 
         if (!baseRef || baseRef.length === 0) {
           throw new Error(`Base branch '${baseBranch}' not found`);
@@ -472,6 +487,8 @@ export class AzureDevOpsService implements IAzureDevOpsService {
           throw new Error(`Could not get commit SHA for base branch '${baseBranch}'`);
         }
 
+        console.log(`📝 Base commit SHA: ${baseCommitSha}`);
+
         // 2. Create the new branch reference
         const newRef = {
           name: `refs/heads/${branchName}`,
@@ -479,11 +496,15 @@ export class AzureDevOpsService implements IAzureDevOpsService {
           newObjectId: baseCommitSha
         };
 
+        console.log(`🚀 Creating new ref:`, newRef);
+
         await this.gitApi.updateRefs(
           [newRef],
           repositoryId,
           this.config.project
         );
+
+        console.log(`✅ Branch created successfully: ${branchName}`);
 
         return {
           success: true,
@@ -491,6 +512,13 @@ export class AzureDevOpsService implements IAzureDevOpsService {
           commitSha: baseCommitSha
         };
       } catch (error) {
+        console.error(`❌ Error in createBranch:`, {
+          error: error instanceof Error ? error.message : error,
+          repositoryId,
+          branchName,
+          project: this.config.project
+        });
+        
         return {
           success: false,
           branchName,
