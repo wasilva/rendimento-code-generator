@@ -1,0 +1,22 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11285,
+    "workItemType": "User Story",
+    "url": "https://dev.azure.com/qacoders-madeinweb/Rendimento/_apis/wit/workItems/11285",
+    "fields": {
+      "System.Title": "Login de acesso",
+      "System.Description": "Implementar sistema de login para usuários",
+      "System.AreaPath": "Rendimento",
+      "System.State": "New",
+      "System.AssignedTo": "wasilva@madeinweb.app"
+    }
+  },
+  "resourceContainers": {
+    "project": {
+      "id": "project-id",
+      "name": "Rendimento"
+    }
+  }
+}

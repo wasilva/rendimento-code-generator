@@ -7,7 +7,7 @@ import { IEnrichedWorkItem, IWorkItemWebhookPayload, WorkItemType } from '../../
 import { IRepositoryConfig } from '../../models/configuration';
 import { IAzureDevOpsService } from '../azure/azureDevOpsService';
 import { IGeminiService } from '../gemini/GeminiService';
-import { IGitService } from '../git/GitService';
+import { IGitService, FileOperation } from '../../models/git';
 import { IPullRequestService } from '../git/PullRequestService';
 import { WorkItemProcessorFactory, IWorkItemProcessingResult } from './processors';
 
@@ -71,9 +71,21 @@ export class WorkItemService implements IWorkItemService {
       
       // 6. Create branch and commit (if code was generated)
       if (generatedCode) {
-        // In real implementation, this would use GitService to create branch and commit
-        // await this.gitService.createBranch(repositoryConfig.url, branchName);
-        // await this.gitService.commitChanges(repositoryConfig.url, generatedCode.files, `feat: ${enrichedWorkItem.title}`);
+        // Create branch in Azure DevOps
+        await this.gitService.createBranch(branchName);
+        
+        // Convert generated files to file changes
+        const fileChanges = generatedCode.files.map(file => ({
+          path: file.path,
+          content: file.content,
+          operation: FileOperation.CREATE
+        }));
+        
+        // Commit generated code to the branch
+        await this.gitService.commitChanges(fileChanges, `feat: ${enrichedWorkItem.title}`);
+      } else {
+        // Even without generated code, create an empty branch for the PR
+        await this.gitService.createBranch(branchName);
       }
       
       // 7. Create pull request

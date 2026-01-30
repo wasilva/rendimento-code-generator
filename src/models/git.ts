@@ -530,6 +530,9 @@ export interface IGitService {
   
   /** Get repository information */
   getRepositoryInfo(): Promise<IRepositoryInfo>;
+  
+  /** Generate a standardized branch name from work item */
+  generateBranchName(workItem: any): string;
 }
 
 /**

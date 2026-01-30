@@ -9,7 +9,6 @@ import { WebhookController } from './controllers/WebhookController';
 import { WorkItemService } from './services/workItem/WorkItemService';
 import { createAzureDevOpsServiceFromEnv } from './services/azure/azureDevOpsService';
 import { MockGeminiService } from './services/gemini/MockGeminiService';
-import { GitService } from './services/git/GitService';
 import { PullRequestService } from './services/git/PullRequestService';
 import { repositoryConfigs } from './config/repositoryConfig';
 
@@ -47,7 +46,14 @@ const azureDevOpsService = createAzureDevOpsServiceFromEnv();
 // Create a mock Gemini service for testing (since API key might not be configured)
 const geminiService = new MockGeminiService(); // Always use mock for now
 
-const gitService = new GitService();
+// Use AzureGitService for Azure DevOps integration
+const { AzureGitService } = require('./services/git/AzureGitService');
+const gitService = new AzureGitService(
+  azureDevOpsService,
+  process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
+  process.env['AZURE_DEVOPS_PROJECT'] || 'Rendimento'
+);
+
 const pullRequestService = new PullRequestService(azureDevOpsService);
 
 // Initialize WorkItemService with all dependencies
