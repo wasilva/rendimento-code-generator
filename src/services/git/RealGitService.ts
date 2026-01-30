@@ -205,4 +205,49 @@ export class RealGitService implements IGitService {
       throw new Error(`Failed to get repository info: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  generateBranchName(workItem: any): string {
+    // Determine branch prefix based on work item type
+    let prefix = 'feat';
+    switch (workItem.type?.toLowerCase()) {
+      case 'bug':
+        prefix = 'bugfix';
+        break;
+      case 'task':
+        prefix = 'feat';
+        break;
+      case 'user story':
+        prefix = 'feat';
+        break;
+      case 'feature':
+        prefix = 'feat';
+        break;
+      default:
+        prefix = 'feat';
+    }
+
+    // Sanitize title for branch name
+    const sanitizedTitle = this.sanitizeForBranchName(workItem.title || 'untitled');
+    
+    // Create branch name: prefix/id_title
+    const branchName = `${prefix}/${workItem.id}_${sanitizedTitle}`;
+    
+    // Ensure branch name doesn't exceed maximum length (50 chars)
+    if (branchName.length > 50) {
+      const maxTitleLength = 50 - prefix.length - workItem.id.toString().length - 2; // 2 for '/' and '_'
+      const truncatedTitle = sanitizedTitle.substring(0, maxTitleLength);
+      return `${prefix}/${workItem.id}_${truncatedTitle}`;
+    }
+    
+    return branchName;
+  }
+
+  private sanitizeForBranchName(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  }
 }
