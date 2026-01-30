@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  rendimento-code-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rendimento-code-generator
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3003:3003"
+    volumes:
+      # Persistir repositórios clonados
+      - ./repos:/app/repos
+      # Persistir logs
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rendimento-http.rule=Host(`rendimento.qacoders.dev.br`)
+      - traefik.http.routers.rendimento-http.entrypoints=web
+      - traefik.http.routers.rendimento-https.tls=true
+      - traefik.http.routers.rendimento-https.tls.certresolver=letsencrypt
+      - traefik.http.routers.rendimento-https.entrypoints=websecure
+      - traefik.http.routers.rendimento-https.rule=Host(`rendimento.qacoders.dev.br`)
+      - traefik.http.services.rendimento.loadbalancer.server.port=3003
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
