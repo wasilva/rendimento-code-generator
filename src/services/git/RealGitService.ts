@@ -4,8 +4,6 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import simpleGit, { SimpleGit } from 'simple-git';
-import * as path from 'path';
 import { 
   IGitService, 
   IBranchCreationResult, 
@@ -67,9 +65,6 @@ export class RealGitService implements IGitService {
 
   async commitChanges(files: IFileChange[], message: string): Promise<ICommitResult> {
     try {
-      const owner = this.config.owner!;
-      const repo = this.config.repo!;
-
       // For simplicity, we'll create a commit with the files
       // In a real implementation, you might want to use the Git API more extensively
       

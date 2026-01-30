@@ -131,25 +131,26 @@ export class {{bugFixName}} {
 
 // Default repository configuration
 export const defaultRepositoryConfig: IRepositoryConfig = {
-  id: 'redimento-main',
-  name: 'Redimento Code Generator',
-  url: process.env['GIT_REPOSITORY_URL'] || 'https://github.com/qacoders-madeinweb/redimento-code-generator.git',
+  id: process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
+  name: 'Rendimento',
+  url: `https://dev.azure.com/qacoders-madeinweb/Rendimento/_git/Rendimento`,
   defaultBranch: 'main',
   targetLanguage: ProgrammingLanguage.TYPESCRIPT,
   codeTemplates: defaultCodeTemplates,
   codingStandards: defaultCodingStandards,
   reviewers: [
-    process.env['DEFAULT_REVIEWER'] || 'admin@qacoders.com'
+    'miqueas.teixeira@madeinweb.app',
+    'luisairtonsilva@gmail.com'
   ],
   areaPathMappings: {
-    'Rendimento': 'redimento-main',
-    'Rendimento\\Backend': 'redimento-main',
-    'Rendimento\\Frontend': 'redimento-main',
-    'Rendimento\\API': 'redimento-main'
+    'Rendimento': process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
+    'Rendimento\\Backend': process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
+    'Rendimento\\Frontend': process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2',
+    'Rendimento\\API': process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2'
   }
 };
 
 // Repository configurations map
 export const repositoryConfigs: Record<string, IRepositoryConfig> = {
-  'redimento-main': defaultRepositoryConfig
+  [process.env['AZURE_DEVOPS_REPOSITORY_ID'] || '90a8257b-327f-41fb-904c-b3a8cdda68a2']: defaultRepositoryConfig
 };
