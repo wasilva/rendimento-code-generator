@@ -116,7 +116,7 @@ redimento-code-generator/
 1. Obtenha uma chave de API do Google AI Studio
 2. Configure a chave no arquivo `.env`
 
-## 🚦 Status do Projeto
+## 🚦 Status do Projeto:
 
 Este projeto está em desenvolvimento ativo. Consulte o arquivo `tasks.md` para ver o progresso atual da implementação.
 

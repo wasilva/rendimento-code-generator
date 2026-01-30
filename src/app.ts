@@ -9,11 +9,11 @@ dotenv.config();
 
 // Create Express application
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env['PORT'] || 3000;
 
 // Create logger
 const logger = createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env['LOG_LEVEL'] || 'info',
   format: format.combine(
     format.timestamp(),
     format.errors({ stack: true }),
@@ -27,7 +27,7 @@ const logger = createLogger({
       )
     }),
     new transports.File({ 
-      filename: process.env.LOG_FILE || './logs/app.log' 
+      filename: process.env['LOG_FILE'] || './logs/app.log' 
     })
   ]
 });
@@ -39,7 +39,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   logger.info(`${req.method} ${req.path}`, {
     ip: req.ip,
     userAgent: req.get('User-Agent'),
@@ -49,12 +49,12 @@ app.use((req, res, next) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    version: process.env['npm_package_version'] || '1.0.0',
+    environment: process.env['NODE_ENV'] || 'development'
   });
 });
 
@@ -69,7 +69,7 @@ app.post('/webhook/workitem', (req, res) => {
 });
 
 // Webhook health check endpoint
-app.get('/webhook/health', (req, res) => {
+app.get('/webhook/health', (_req, res) => {
   res.status(200).json({
     status: 'healthy',
     service: 'webhook-service',
@@ -79,18 +79,18 @@ app.get('/webhook/health', (req, res) => {
       health: `http://localhost:${port}/webhook/health`
     },
     configuration: {
-      webhookSecret: process.env.WEBHOOK_SECRET ? 'configured' : 'not configured',
-      azureDevOps: process.env.AZURE_DEVOPS_TOKEN ? 'configured' : 'not configured',
-      geminiApi: process.env.GEMINI_API_KEY ? 'configured' : 'not configured'
+      webhookSecret: process.env['WEBHOOK_SECRET'] ? 'configured' : 'not configured',
+      azureDevOps: process.env['AZURE_DEVOPS_TOKEN'] ? 'configured' : 'not configured',
+      geminiApi: process.env['GEMINI_API_KEY'] ? 'configured' : 'not configured'
     },
     lastActivity: 'No recent webhook activity', // This could be enhanced to track actual activity
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env['npm_package_version'] || '1.0.0'
   });
 });
 
 // Webhook info endpoint (GET) - for testing and documentation
-app.get('/webhook/workitem', (req, res) => {
+app.get('/webhook/workitem', (_req, res) => {
   res.status(200).json({
     message: 'Azure DevOps Webhook Endpoint',
     method: 'POST',
@@ -120,7 +120,7 @@ app.get('/webhook/workitem', (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', {
     error: error.message,
     stack: error.stack,
@@ -147,7 +147,7 @@ app.use('*', (req, res) => {
 const server = app.listen(port, () => {
   logger.info(`🚀 Redimento Code Generator started successfully`, {
     port,
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env['NODE_ENV'] || 'development',
     timestamp: new Date().toISOString()
   });
   
