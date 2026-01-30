@@ -1,0 +1,41 @@
+{
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "resource": {
+    "id": 11256,
+    "fields": {
+      "Microsoft.VSTS.Common.Priority": 2,
+      "Microsoft.VSTS.Common.StateChangeDate": "2026-01-30T13:30:45.287Z",
+      "Microsoft.VSTS.Common.ValueArea": "Business",
+      "System.AreaPath": "Rendimento",
+      "System.ChangedBy": "QaCoders Agent <qacoders@qacoders.com.br>",
+      "System.ChangedDate": "2026-01-30T13:30:45.287Z",
+      "System.CommentCount": 0,
+      "System.CreatedBy": "QaCoders Agent <qacoders@qacoders.com.br>",
+      "System.CreatedDate": "2026-01-30T13:30:45.287Z",
+      "System.Description": "<div>crie uma api de login , com autenticação de email e senha,&nbsp;<br><br>crie em .net a linguagem </div>",
+      "System.IterationPath": "Rendimento",
+      "System.Reason": "New",
+      "System.State": "New",
+      "System.TeamProject": "Rendimento",
+      "System.Title": "Login de usuario",
+      "System.WorkItemType": "User Story"
+    },
+    "rev": 1,
+    "url": "https://dev.azure.com/qacoders-madeinweb/2d56db7f-11e7-43e4-a084-fce637717759/_apis/wit/workItems/11256"
+  },
+  "resourceContainers": {
+    "account": {
+      "baseUrl": "https://dev.azure.com/qacoders-madeinweb/",
+      "id": "7669e242-52fd-4f2b-a492-099f8232d979"
+    },
+    "collection": {
+      "baseUrl": "https://dev.azure.com/qacoders-madeinweb/",
+      "id": "fd407f78-e5ce-4368-bcb0-85e658002a88"
+    },
+    "project": {
+      "id": "2d56db7f-11e7-43e4-a084-fce637717759",
+      "name": "Rendimento"
+    }
+  }
+}
